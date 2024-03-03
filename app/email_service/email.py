@@ -1,12 +1,20 @@
 from flask import Blueprint, render_template, request
 import smtplib
+from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
 
 email = Blueprint('email_service', __name__)
 
-SMTP_KEY = "some_secret"
-SMTP_USER = "user@example.com"
-SMTP_SERVER = "smtp.example.com"
+key_vault_name = "km5137blogcapstone"
+key_vault_uri = f"https://{key_vault_name}.vault.azure.net/"
+
+credential = DefaultAzureCredential()
+client = SecretClient(vault_url=key_vault_uri, credential=credential)
+
+SMTP_SERVER = "smtp.ukr.net"
 SMTP_PORT = 465
+SMTP_KEY = client.get_secret("smtpSecret").value
+SMTP_USER = client.get_secret("smtpUser").value
 
 def send_email(**kwargs):
     header = f'From: <{SMTP_USER}>\n' \
