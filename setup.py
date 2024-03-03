@@ -10,7 +10,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'blogcapstone=app.run:main',
+            'blogcapstone=run:main',
         ],
     },
 )
