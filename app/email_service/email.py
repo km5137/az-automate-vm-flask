@@ -1,0 +1,30 @@
+from flask import Blueprint, render_template, request
+import smtplib
+
+email = Blueprint('email_service', __name__)
+
+SMTP_KEY = "some_secret"
+SMTP_USER = "user@example.com"
+SMTP_SERVER = "smtp.example.com"
+SMTP_PORT = 465
+
+def send_email(**kwargs):
+    header = f'From: <{SMTP_USER}>\n' \
+             f'To: {SMTP_USER}\n' \
+             'Subject: test_email\n\n' \
+
+    body = "\n".join([f"{key}:{value}" for key, value in kwargs.items()])
+
+    with smtplib.SMTP_SSL(host=SMTP_SERVER, port=SMTP_PORT) as smtp:
+        smtp.login(user=SMTP_USER, password=SMTP_KEY)
+        smtp.sendmail(from_addr=SMTP_USER, to_addrs=SMTP_USER, msg=header + body)
+
+# Adjust the route to avoid conflict with the main blueprint
+@email.route("/contact", methods=['GET', 'POST'])
+def contact():
+    if request.method == 'GET':
+        return render_template("contact.html")
+    else:
+        notification = "Successfully sent you message"
+        send_email(**request.form)
+        return render_template("contact.html", title=notification)
